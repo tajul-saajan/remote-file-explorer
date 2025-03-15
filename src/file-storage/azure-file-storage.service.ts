@@ -15,9 +15,11 @@ export class AzureFileStorage implements FileStorage {
       BlobServiceClient.fromConnectionString(connectionString);
   }
 
-  private async getContainerClient(clientId: string) {
+  private async getContainerClient(clientId: string, forceCreate = false) {
     const containerClient = this.blobServiceClient.getContainerClient(clientId);
-    await containerClient.createIfNotExists();
+    if (forceCreate) {
+      await containerClient.createIfNotExists();
+    }
     return containerClient;
   }
 
@@ -38,7 +40,7 @@ export class AzureFileStorage implements FileStorage {
     clientId = 'dummy-client1',
     folder_name?: string,
   ): Promise<string> {
-    const containerClient = await this.getContainerClient(clientId);
+    const containerClient = await this.getContainerClient(clientId, true);
     let blobName = `${Date.now()}-${file.originalname}`; // Organize files by client ID
     if (folder_name) {
       blobName = `${folder_name}/${blobName}`;
@@ -81,5 +83,24 @@ export class AzureFileStorage implements FileStorage {
     });
 
     return blockBlobClient.url;
+  }
+
+  async deleteFile(
+    blobName: string,
+    client_id = 'dummy-client1',
+  ): Promise<boolean> {
+    const containerClient = await this.getContainerClient(client_id);
+    const blobClient = containerClient.getBlobClient(
+      `${client_id}/${blobName}`,
+    );
+
+    const exists = await blobClient.exists();
+
+    if (!exists) {
+      return false;
+    }
+
+    await blobClient.delete();
+    return true;
   }
 }

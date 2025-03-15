@@ -19,4 +19,8 @@ export class ExplorerService {
   async createFolder(folder_name: string, clientId?: string): Promise<string> {
     return await this.fileStorage.createFolder(folder_name, clientId);
   }
+
+  async deleteFile(blobName: string, clientId?: string): Promise<boolean> {
+    return await this.fileStorage.deleteFile(blobName, clientId);
+  }
 }

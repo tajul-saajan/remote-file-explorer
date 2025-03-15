@@ -1,7 +1,11 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
+  HttpException,
+  HttpStatus,
+  Param,
   Post,
   Query,
   UploadedFiles,
@@ -34,5 +38,20 @@ export class ExplorerController {
     //   resolve(folder_name || 'noooo');
     // });
     return await this.explorerService.createFolder(folder_name);
+  }
+
+  @Delete('file')
+  async deleteFile(@Body('file_path') file_path: string) {
+    // return new Promise((resolve) => {
+    //   resolve(file_path || 'noooo');
+    // });
+    const isDeleted = await this.explorerService.deleteFile(file_path);
+    let message = 'File deleted successfully';
+    if (!isDeleted) {
+      message = 'File does not exist';
+      throw new HttpException(message, HttpStatus.NOT_FOUND);
+    }
+
+    return { message };
   }
 }

@@ -8,4 +8,6 @@ export interface FileStorage {
   listFiles(clientId?: string, folder_path?: string): Promise<string[]>;
 
   createFolder(folder_name: string, clientId?: string): Promise<string>;
+
+  deleteFile(blobName: string, clientId?: string): Promise<boolean>;
 }
