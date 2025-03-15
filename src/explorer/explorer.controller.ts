@@ -1,6 +1,8 @@
 import {
   Controller,
+  Get,
   Post,
+  Query,
   UploadedFiles,
   UseInterceptors,
 } from '@nestjs/common';
@@ -17,5 +19,10 @@ export class ExplorerController {
     @UploadedFiles() files: { files: Express.Multer.File[] },
   ) {
     return await this.explorerService.uploadFiles(files.files);
+  }
+
+  @Get('list')
+  async getFileList(@Query('folder_path') folder_path?: string) {
+    return await this.explorerService.getAllFiles(undefined, folder_path);
   }
 }

@@ -8,4 +8,11 @@ export class ExplorerService {
   async uploadFiles(files: Express.Multer.File[]) {
     return await this.fileStorage.uploadFiles(files);
   }
+
+  async getAllFiles(
+    client_id?: string,
+    folder_path?: string,
+  ): Promise<string[]> {
+    return await this.fileStorage.listFiles(client_id, folder_path);
+  }
 }
