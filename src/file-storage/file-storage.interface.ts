@@ -1,3 +1,3 @@
 export interface FileStorage {
-  uploadFiles(files: Express.Multer.File[]): Promise<unknown>;
+  uploadFiles(files: Express.Multer.File[], Options?: object): Promise<unknown>;
 }

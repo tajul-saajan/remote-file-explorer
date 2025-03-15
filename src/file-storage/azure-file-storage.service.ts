@@ -6,32 +6,39 @@ import { Readable } from 'stream';
 
 @Injectable()
 export class AzureFileStorage implements FileStorage {
-  private containerClient: ContainerClient;
+  private blobServiceClient: BlobServiceClient;
 
   constructor(configService: ConfigService) {
     const connectionString =
       configService.get<string>('AZURE_STORAGE_CONNECTION_STRING') || '';
-    const blobServiceClient =
+    this.blobServiceClient =
       BlobServiceClient.fromConnectionString(connectionString);
-    this.containerClient =
-      blobServiceClient.getContainerClient('dummy-client1');
   }
 
-  async uploadFiles(files: Express.Multer.File[]) {
+  private async getContainerClient(clientId: string) {
+    const containerClient = this.blobServiceClient.getContainerClient(clientId);
+    await containerClient.createIfNotExists();
+    return containerClient;
+  }
+
+  async uploadFiles(
+    files: Express.Multer.File[],
+    options: { client_id: string | undefined },
+  ) {
     console.log(files);
     const uploadPromises = files.map((file) =>
-      this.uploadFile('dummy-client1', file),
+      this.uploadFile(file, options?.client_id),
     );
     return Promise.all(uploadPromises);
   }
 
   private async uploadFile(
-    clientId: string,
     file: Express.Multer.File,
+    clientId = 'dummy-client1',
   ): Promise<string> {
-    await this.containerClient.createIfNotExists();
+    const containerClient = await this.getContainerClient(clientId);
     const blobName = `${clientId}/${Date.now()}-${file.originalname}`; // Organize files by client ID
-    const blockBlobClient = this.containerClient.getBlockBlobClient(blobName);
+    const blockBlobClient = containerClient.getBlockBlobClient(blobName);
     await blockBlobClient.uploadData(file.buffer, {
       blobHTTPHeaders: { blobContentType: file.mimetype },
     });
