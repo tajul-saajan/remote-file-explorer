@@ -60,4 +60,19 @@ export class AzureFileStorage implements FileStorage {
 
     return files;
   }
+
+  async createFolder(
+    folderName: string,
+    clientId = 'dummy-client1',
+  ): Promise<string> {
+    const folderPath = `${clientId}/${folderName}/`; // Add trailing slash for folder
+    const containerClient = await this.getContainerClient(clientId);
+    const blockBlobClient = containerClient.getBlockBlobClient(folderPath);
+
+    await blockBlobClient.uploadData(Buffer.from(''), {
+      blobHTTPHeaders: { blobContentType: 'application/octet-stream' },
+    });
+
+    return blockBlobClient.url;
+  }
 }

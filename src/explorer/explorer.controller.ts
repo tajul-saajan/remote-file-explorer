@@ -1,4 +1,5 @@
 import {
+  Body,
   Controller,
   Get,
   Post,
@@ -24,5 +25,13 @@ export class ExplorerController {
   @Get('list')
   async getFileList(@Query('folder_path') folder_path?: string) {
     return await this.explorerService.getAllFiles(undefined, folder_path);
+  }
+
+  @Post('folder')
+  async createFolder(@Body('folder_name') folder_name: string) {
+    // return new Promise((resolve) => {
+    //   resolve(folder_name || 'noooo');
+    // });
+    return await this.explorerService.createFolder(folder_name);
   }
 }
