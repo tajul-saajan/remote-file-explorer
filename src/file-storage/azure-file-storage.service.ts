@@ -85,22 +85,16 @@ export class AzureFileStorage implements FileStorage {
     return blockBlobClient.url;
   }
 
-  async deleteFile(
-    blobName: string,
+  async deleteFiles(
+    blobNames: string[],
     client_id = 'dummy-client1',
-  ): Promise<boolean> {
+  ): Promise<void> {
     const containerClient = await this.getContainerClient(client_id);
-    const blobClient = containerClient.getBlobClient(
-      `${client_id}/${blobName}`,
-    );
+    const blobBatchClient = containerClient.getBlobBatchClient();
+    const blobClients = blobNames.map((blobName) => {
+      return containerClient.getBlobClient(`${client_id}/${blobName}`);
+    });
 
-    const exists = await blobClient.exists();
-
-    if (!exists) {
-      return false;
-    }
-
-    await blobClient.delete();
-    return true;
+    await blobBatchClient.deleteBlobs(blobClients);
   }
 }
