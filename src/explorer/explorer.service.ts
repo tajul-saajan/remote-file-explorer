@@ -5,8 +5,8 @@ import { FileStorage } from '../file-storage/file-storage.interface';
 export class ExplorerService {
   constructor(@Inject('FILE_STORAGE') private fileStorage: FileStorage) {}
 
-  async uploadFiles(files: Express.Multer.File[]) {
-    return await this.fileStorage.uploadFiles(files);
+  async uploadFiles(files: Express.Multer.File[], folder_name?: string) {
+    return await this.fileStorage.uploadFiles(files, {}, folder_name);
   }
 
   async getAllFiles(

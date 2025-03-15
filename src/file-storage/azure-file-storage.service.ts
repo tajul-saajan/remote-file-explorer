@@ -24,10 +24,11 @@ export class AzureFileStorage implements FileStorage {
   async uploadFiles(
     files: Express.Multer.File[],
     options: { client_id: string | undefined },
+    folder_name?: string,
   ) {
     console.log(files);
     const uploadPromises = files.map((file) =>
-      this.uploadFile(file, options?.client_id),
+      this.uploadFile(file, options?.client_id, folder_name),
     );
     return Promise.all(uploadPromises);
   }
@@ -35,10 +36,16 @@ export class AzureFileStorage implements FileStorage {
   private async uploadFile(
     file: Express.Multer.File,
     clientId = 'dummy-client1',
+    folder_name?: string,
   ): Promise<string> {
     const containerClient = await this.getContainerClient(clientId);
-    const blobName = `${clientId}/${Date.now()}-${file.originalname}`; // Organize files by client ID
-    const blockBlobClient = containerClient.getBlockBlobClient(blobName);
+    let blobName = `${Date.now()}-${file.originalname}`; // Organize files by client ID
+    if (folder_name) {
+      blobName = `${folder_name}/${blobName}`;
+    }
+    const blockBlobClient = containerClient.getBlockBlobClient(
+      `${clientId}/${blobName}`,
+    );
     await blockBlobClient.uploadData(file.buffer, {
       blobHTTPHeaders: { blobContentType: file.mimetype },
     });

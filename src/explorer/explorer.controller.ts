@@ -18,8 +18,9 @@ export class ExplorerController {
   @UseInterceptors(FileFieldsInterceptor([{ name: 'files', maxCount: 10 }]))
   async uploadMultipleFiles(
     @UploadedFiles() files: { files: Express.Multer.File[] },
+    @Body('folder_name') folder_name: string,
   ) {
-    return await this.explorerService.uploadFiles(files.files);
+    return await this.explorerService.uploadFiles(files.files, folder_name);
   }
 
   @Get('list')
