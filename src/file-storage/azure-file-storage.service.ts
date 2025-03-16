@@ -24,19 +24,19 @@ export class AzureFileStorage implements FileStorage {
 
   async uploadFiles(
     files: Express.Multer.File[],
-    options: { client_id: string | undefined },
+    options: { client_id: string },
     folder_name?: string,
   ) {
     console.log(files);
     const uploadPromises = files.map((file) =>
-      this.uploadFile(file, options?.client_id, folder_name),
+      this.uploadFile(file, options.client_id, folder_name),
     );
     return Promise.all(uploadPromises);
   }
 
   private async uploadFile(
     file: Express.Multer.File,
-    clientId = 'dummy-client1',
+    clientId: string,
     folder_name?: string,
   ): Promise<string> {
     const containerClient = await this.getContainerClient(clientId, true);
@@ -53,12 +53,9 @@ export class AzureFileStorage implements FileStorage {
     return blockBlobClient.url;
   }
 
-  async listFiles(
-    clientId = 'dummy-client1',
-    folderPath?: string,
-  ): Promise<string[]> {
+  async listFiles(clientId: string, folderPath?: string): Promise<string[]> {
     const prefix = folderPath ? `${clientId}/${folderPath}/` : `${clientId}/`;
-    const containerClient = await this.getContainerClient(clientId);
+    const containerClient = await this.getContainerClient(clientId, true);
     const blobs = containerClient.listBlobsFlat({ prefix });
 
     const files: string[] = [];
@@ -69,10 +66,7 @@ export class AzureFileStorage implements FileStorage {
     return files;
   }
 
-  async createFolder(
-    folderName: string,
-    clientId = 'dummy-client1',
-  ): Promise<string> {
+  async createFolder(folderName: string, clientId: string): Promise<string> {
     const folderPath = `${clientId}/${folderName}/`; // Add trailing slash for folder
     const containerClient = await this.getContainerClient(clientId);
     const blockBlobClient = containerClient.getBlockBlobClient(folderPath);
@@ -84,10 +78,7 @@ export class AzureFileStorage implements FileStorage {
     return blockBlobClient.url;
   }
 
-  async deleteFiles(
-    blobNames: string[],
-    client_id = 'dummy-client1',
-  ): Promise<void> {
+  async deleteFiles(blobNames: string[], client_id: string): Promise<void> {
     const containerClient = await this.getContainerClient(client_id);
     const blobBatchClient = containerClient.getBlobBatchClient();
     const blobClients = blobNames.map((blobName) => {
@@ -99,7 +90,7 @@ export class AzureFileStorage implements FileStorage {
 
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-expect-error
-  async getFileStream(blobName: string, client_id = 'dummy-client1') {
+  async getFileStream(blobName: string, client_id: string) {
     const containerClient = await this.getContainerClient(client_id);
     const blobClient = containerClient.getBlobClient(blobName);
     const exists = await blobClient.exists();

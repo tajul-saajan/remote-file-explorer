@@ -7,8 +7,16 @@ import { Response } from 'express';
 export class ExplorerService {
   constructor(@Inject('FILE_STORAGE') private fileStorage: FileStorage) {}
 
-  async uploadFiles(files: Express.Multer.File[], folder_name?: string) {
-    return await this.fileStorage.uploadFiles(files, {}, folder_name);
+  async uploadFiles(
+    files: Express.Multer.File[],
+    client_id: string,
+    folder_name?: string,
+  ) {
+    return await this.fileStorage.uploadFiles(
+      files,
+      { client_id },
+      folder_name,
+    );
   }
 
   async getAllFiles(
