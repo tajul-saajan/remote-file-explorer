@@ -1,8 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { FileStorage } from './file-storage.interface';
-import { BlobServiceClient, ContainerClient } from '@azure/storage-blob';
+import { BlobServiceClient } from '@azure/storage-blob';
 import { ConfigService } from '@nestjs/config';
-import { Readable } from 'stream';
 
 @Injectable()
 export class AzureFileStorage implements FileStorage {
@@ -96,5 +95,19 @@ export class AzureFileStorage implements FileStorage {
     });
 
     await blobBatchClient.deleteBlobs(blobClients);
+  }
+
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-expect-error
+  async getFileStream(blobName: string, client_id = 'dummy-client1') {
+    const containerClient = await this.getContainerClient(client_id);
+    const blobClient = containerClient.getBlobClient(blobName);
+    const exists = await blobClient.exists();
+    if (!exists) {
+      throw new NotFoundException('No file exists');
+    }
+
+    const downloadResponse = await blobClient.download();
+    return downloadResponse.readableStreamBody;
   }
 }

@@ -7,11 +7,13 @@ import {
   HttpStatus,
   Post,
   Query,
+  Res,
   UploadedFiles,
   UseInterceptors,
 } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { ExplorerService } from './explorer.service';
+import { Response } from 'express';
 
 @Controller('explorer')
 export class ExplorerController {
@@ -43,5 +45,10 @@ export class ExplorerController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteFiles(@Body('files') files: string[]) {
     await this.explorerService.deleteFiles(files);
+  }
+
+  @Post('download')
+  async downloadFiles(@Body('files') files: string[], @Res() res: Response) {
+    return await this.explorerService.downloadFiles(res, files);
   }
 }
