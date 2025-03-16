@@ -29,6 +29,7 @@ import { UserModule } from './user/user.module';
     }),
     ExplorerModule,
     FileStorageModule,
+    UserModule,
   ],
   controllers: [AppController],
   providers: [AppService],
