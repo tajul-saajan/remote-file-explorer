@@ -53,16 +53,30 @@ export class AzureFileStorage implements FileStorage {
     return blockBlobClient.url;
   }
 
-  async listFiles(clientId: string, folderPath?: string): Promise<string[]> {
+  async listFiles(clientId: string, folderPath?: string) {
     const prefix = folderPath ? `${clientId}/${folderPath}/` : `${clientId}/`;
     const containerClient = await this.getContainerClient(clientId, true);
     const blobs = containerClient.listBlobsFlat({ prefix });
 
-    const files: string[] = [];
+    const files: any[] = [];
     for await (const blob of blobs) {
-      files.push(blob.name);
+      const blobClient = containerClient.getBlobClient(blob.name);
+      const properties = await blobClient.getProperties();
+
+      files.push({
+        name: blob.name,
+        isFolder: blob.name.endsWith('/'),
+        metadata: properties.metadata,
+        properties: {
+          contentType: properties.contentType,
+          contentLength: properties.contentLength,
+          lastModified: properties.lastModified,
+          etag: properties.etag,
+        },
+      });
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return files;
   }
 

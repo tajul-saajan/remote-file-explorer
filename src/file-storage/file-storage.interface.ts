@@ -5,7 +5,7 @@ export interface FileStorage {
     folder_name?: string,
   ): Promise<unknown>;
 
-  listFiles(clientId?: string, folder_path?: string): Promise<string[]>;
+  listFiles(clientId?: string, folder_path?: string): Promise<any>;
 
   createFolder(folder_name: string, clientId?: string): Promise<string>;
 
