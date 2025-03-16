@@ -16,7 +16,7 @@ export class UserService {
     return await this.userRepository.findOne({ where: { username } });
   }
 
-  async create(userDto: CreateUserDto): Promise<User> {
+  async create(userDto: CreateUserDto) {
     const hashedPassword = await bcrypt.hash(userDto.password, 10);
 
     const user = await this.findOne(userDto.username);
@@ -24,13 +24,11 @@ export class UserService {
       throw new HttpException('User already exists', HttpStatus.BAD_REQUEST);
     }
 
-    const newUser = this.userRepository.create({
-      ...userDto,
-      password: hashedPassword,
-    });
+    userDto.password = hashedPassword;
 
+    const newUser = await this.userRepository.save(userDto);
     const { password: _, ...rest } = newUser;
 
-    return this.userRepository.save(rest);
+    return rest;
   }
 }
