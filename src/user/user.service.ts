@@ -1,7 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './user.entity';
+import * as bcrypt from 'bcrypt';
+import { CreateUserDto } from './create-user.dto';
 
 @Injectable()
 export class UserService {
@@ -14,8 +16,21 @@ export class UserService {
     return await this.userRepository.findOne({ where: { username } });
   }
 
-  async create(user: Partial<User>): Promise<User> {
-    const newUser = this.userRepository.create(user);
-    return this.userRepository.save(newUser);
+  async create(userDto: CreateUserDto): Promise<User> {
+    const hashedPassword = await bcrypt.hash(userDto.password, 10);
+
+    const user = await this.findOne(userDto.username);
+    if (user) {
+      throw new HttpException('User already exists', HttpStatus.BAD_REQUEST);
+    }
+
+    const newUser = this.userRepository.create({
+      ...userDto,
+      password: hashedPassword,
+    });
+
+    const { password: _, ...rest } = newUser;
+
+    return this.userRepository.save(rest);
   }
 }
