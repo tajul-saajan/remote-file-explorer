@@ -51,7 +51,9 @@ npm install
 
 3. ### Setup environment variables 
 4. ### Setup Database
+5. #### For swagger documentation go to `BASE_URL/api` endpoint
 
 ## Further Improvements
 - add basic unit tests
-- dockerize 
+- pagination in search result
+- dockerize
