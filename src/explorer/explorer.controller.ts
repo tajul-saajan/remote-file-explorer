@@ -27,6 +27,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { AuthUser } from '../types';
+import { Throttle } from '@nestjs/throttler';
 
 @ApiTags('Explorer')
 @Controller('explorer')
@@ -67,6 +68,7 @@ export class ExplorerController {
 
   @Get('list')
   @UseGuards(AuthGuard('jwt'))
+  @Throttle({ default: { limit: 3, ttl: 30000 } })
   @ApiOperation({ summary: 'List files and folders with metadata' })
   @ApiQuery({
     name: 'folder_path',
