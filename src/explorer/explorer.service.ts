@@ -19,11 +19,8 @@ export class ExplorerService {
     );
   }
 
-  async getAllFiles(
-    client_id?: string,
-    folder_path?: string,
-  ): Promise<string[]> {
-    return await this.fileStorage.listFiles(client_id, folder_path);
+  async getAllFiles(client_id?: string, folder_path?: string, search?: string) {
+    return await this.fileStorage.listFiles(client_id, folder_path, search);
   }
 
   async createFolder(folder_name: string, clientId?: string): Promise<string> {
