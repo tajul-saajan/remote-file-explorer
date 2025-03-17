@@ -34,6 +34,7 @@ This is a basic file explorer that facilitates different file/folder operations 
 - prettier
 - jest
 - swagger
+- Rate Limiting
 
 ## Getting Started
 Follow these steps to get the project up and running on your local machine.
