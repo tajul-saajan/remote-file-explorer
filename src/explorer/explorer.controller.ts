@@ -22,6 +22,7 @@ import {
   ApiBody,
   ApiConsumes,
   ApiOperation,
+  ApiQuery,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
@@ -67,6 +68,16 @@ export class ExplorerController {
   @Get('list')
   @UseGuards(AuthGuard('jwt'))
   @ApiOperation({ summary: 'List files and folders with metadata' })
+  @ApiQuery({
+    name: 'folder_path',
+    description: 'list file under specific folder',
+    required: false,
+  })
+  @ApiQuery({
+    name: 'search',
+    description: 'search term for file/folder name',
+    required: false,
+  })
   @ApiResponse({
     schema: {
       example: [
