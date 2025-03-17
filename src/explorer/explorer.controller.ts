@@ -25,6 +25,7 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { AuthUser } from '../types';
 
 @ApiTags('Explorer')
 @Controller('explorer')
@@ -51,14 +52,14 @@ export class ExplorerController {
     },
   })
   async uploadMultipleFiles(
-    @User() user: any,
+    @User() user: AuthUser,
     @UploadedFiles() files: { files: Express.Multer.File[] },
     @Body('folder_name') folder_name: string,
   ) {
     const { username: clientId } = user;
     return await this.explorerService.uploadFiles(
       files.files,
-      clientId as string,
+      clientId,
       folder_name,
     );
   }
@@ -84,13 +85,15 @@ export class ExplorerController {
     },
   })
   async getFileList(
-    @User() user: any,
+    @User() user: AuthUser,
     @Query('folder_path') folder_path?: string,
+    @Query('search') search?: string,
   ) {
     const { username: clientId } = user;
     return await this.explorerService.getAllFiles(
-      clientId as string,
+      clientId,
       folder_path,
+      search,
     );
   }
 
@@ -105,14 +108,11 @@ export class ExplorerController {
     },
   })
   async createFolder(
-    @User() user: any,
+    @User() user: AuthUser,
     @Body('folder_name') folder_name: string,
   ) {
     const { username: clientId } = user;
-    const path = await this.explorerService.createFolder(
-      folder_name,
-      clientId as string,
-    );
+    const path = await this.explorerService.createFolder(folder_name, clientId);
 
     return { path };
   }
@@ -136,9 +136,9 @@ export class ExplorerController {
     },
   })
   @ApiResponse({ status: HttpStatus.NO_CONTENT })
-  async deleteFiles(@User() user: any, @Body('files') files: string[]) {
+  async deleteFiles(@User() user: AuthUser, @Body('files') files: string[]) {
     const { username: clientId } = user;
-    await this.explorerService.deleteFiles(files, clientId as string);
+    await this.explorerService.deleteFiles(files, clientId);
   }
 
   @Post('download')
@@ -176,15 +176,11 @@ export class ExplorerController {
   })
   @Header('Content-Disposition', 'attachment; filename="file.txt"')
   async downloadFiles(
-    @User() user: any,
+    @User() user: AuthUser,
     @Body('files') files: string[],
     @Res() res: Response,
   ) {
     const { username: clientId } = user;
-    return await this.explorerService.downloadFiles(
-      res,
-      files,
-      clientId as string,
-    );
+    return await this.explorerService.downloadFiles(res, files, clientId);
   }
 }

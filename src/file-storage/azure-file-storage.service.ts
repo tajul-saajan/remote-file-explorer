@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { FileStorage } from './file-storage.interface';
 import { BlobServiceClient } from '@azure/storage-blob';
 import { ConfigService } from '@nestjs/config';
+import { ListItem } from '../types';
 
 @Injectable()
 export class AzureFileStorage implements FileStorage {
@@ -53,30 +54,33 @@ export class AzureFileStorage implements FileStorage {
     return blockBlobClient.url;
   }
 
-  async listFiles(clientId: string, folderPath?: string) {
+  async listFiles(clientId: string, folderPath?: string, search?: string) {
     const prefix = folderPath ? `${clientId}/${folderPath}/` : `${clientId}/`;
     const containerClient = await this.getContainerClient(clientId, true);
     const blobs = containerClient.listBlobsFlat({ prefix });
 
-    const files: any[] = [];
+    const files: ListItem[] = [];
     for await (const blob of blobs) {
       const blobClient = containerClient.getBlobClient(blob.name);
       const properties = await blobClient.getProperties();
 
-      files.push({
+      const item: ListItem = {
         name: blob.name,
         isFolder: blob.name.endsWith('/'),
-        metadata: properties.metadata,
+        metadata: properties.metadata as unknown as object,
         properties: {
-          contentType: properties.contentType,
-          contentLength: properties.contentLength,
-          lastModified: properties.lastModified,
-          etag: properties.etag,
+          contentType: properties.contentType as unknown as string,
+          contentLength: properties.contentLength as unknown as number,
+          lastModified: properties.lastModified as unknown as string,
+          etag: properties.etag as unknown as string,
         },
-      });
+      };
+
+      if ((search && item.name.includes(search)) || !search) {
+        files.push(item);
+      }
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return files;
   }
 
