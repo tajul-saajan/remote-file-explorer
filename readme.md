@@ -57,4 +57,3 @@ npm install
 ## Further Improvements
 - add basic unit tests
 - pagination in search result
-- dockerize
